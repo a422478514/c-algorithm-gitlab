@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define QUEUE_MAX_SIZE 100
+
+typedef int QElementType;
+
+//循环队列
+typedef struct
+{
+	QElementType *base;
+	int front;
+	int rear;
+}CycleQueue,*PCycleQueue;
+
+//初始化一个队列
+void init(PCycleQueue queue){
+	//分配循环链表的存储空间
+	queue->base = (QElementType *) malloc(sizeof(QElementType)*QUEUE_MAX_SIZE);
+	queue->rear = 0;
+	queue->front = 0;
+}
+
+//入队
+void enqueue(PCycleQueue queue,QElementType e){
+	if(isFull(queue)){
+		return;
+	}
+	queue->base[queue->rear] = e;
+	queue->rear = (queue->rear+1)%QUEUE_MAX_SIZE;
+	printf("%d\n", queue->rear);
+}
+
+//出队
+void dequeue(PCycleQueue queue,QElementType e){
+	if(isEmpty(queue)){
+		return;
+	}
+	e = queue->base[queue->front];
+	queue->front = (queue->front+1)%QUEUE_MAX_SIZE;
+	printf("%d\n", queue->front);
+}
+
+//队列是否空
+int isEmpty(PCycleQueue queue){
+	if(queue->front == queue->rear){
+		printf("%s\n", "队空");
+		return 1;
+	}
+	return 0;
+}
+//队列是否满
+int isFull(PCycleQueue queue){
+	if((queue->rear+1)%QUEUE_MAX_SIZE == queue->front){
+		printf("%s\n", "队满");
+		return 1;
+	}
+	return 0;
+}
+
+//返回队列的长度
+int queueLength(PCycleQueue queue){
+	int length = (queue->rear - queue->front + QUEUE_MAX_SIZE)%QUEUE_MAX_SIZE;
+	printf("%s    %d\n", "length is",length);
+	return length;
+}
+
+//打印列表中元素
+void printQueue(PCycleQueue queue){
+	int length = queueLength(queue);
+	int i = 0;
+	int front = queue->front;
+	while(i<length){
+		printf("%d\n", queue->base[(front+i)%QUEUE_MAX_SIZE]);
+		i++;
+	}
+}
+
+int main(){
+	PCycleQueue queue = (PCycleQueue) malloc(sizeof(CycleQueue));
+	init(queue);
+	int i = 0;
+	int j = 0;
+	while(j<20){
+		while(i++<10){
+			enqueue(queue,i);
+		}
+		printQueue(queue);
+		while(i-->0){
+			dequeue(queue,i);
+			printf("%d\n", i);
+		}
+		j++;
+	}
+	return 0;
+}

@@ -1,0 +1,114 @@
+package com.daquan.contest;
+
+import java.util.Arrays;
+
+/*
+ *功能：动态规划
+ *@author:zhangdaquan
+ *@date:2018/12/26 下午6:34
+ *@version:1.0
+ */
+public class DynamicPrograming {
+    private static int []mineArr = {400,500,200,300,350};
+    private static int []needPeopleArr = {5,5,3,4,3};
+    private static int totalPeople = 10;
+
+    //跳台阶问题
+    public static int jumpStage(int n){
+        if( n == 0){
+            return 0;
+        }
+        if( n == 1){
+            return 1;
+        }
+        if(n == 2){
+            return 2;
+        }
+        int a = 1;
+        int b = 2;
+        int temp = 0;
+
+        for (int i = 3; i <= n ; i++){
+            temp = a+b;
+            a = b;
+            b = temp;
+        }
+        return temp;
+    }
+
+    //递归解决，有BUG
+    public static int countMax(int mine,int people){
+        //第一座矿
+        if(mine == 0){
+            if(people > needPeopleArr[0]){
+                return mineArr[0];
+            }else{
+                return 0;
+            }
+        }else{
+            //如果当前人数够踩金子的
+            int enoughCai = 0;
+            int notEnoughCai = 0;
+            if(people > needPeopleArr[mine]){
+                //采这个金矿的话，能获得多少金子
+                enoughCai = countMax(mine-1,people - needPeopleArr[mine]) + mineArr[mine];
+            }
+            //当前人数不采矿的话，能得到多少金子
+            notEnoughCai = countMax(mine-1,people);
+            if(enoughCai > notEnoughCai){
+                return enoughCai;
+            }else{
+                return notEnoughCai;
+            }
+        }
+    }
+    //动态规划解决
+    public static int getMostGold(int totalMine,int totalPeople,int []mineGoldArr,int []needPeopleArr){
+        //初始化边界数组
+        int []boundaryArr = new int[totalPeople];
+        //第一个矿挖或不挖的情况
+        for (int i = 0 ; i < totalPeople ; i++){
+            //如果人数够第一个矿的
+            if(i < needPeopleArr[0]-1){
+                boundaryArr[i] = 0;
+            }else{
+                boundaryArr[i] = mineGoldArr[0];
+            }
+        }
+        //计算接下来的矿
+        for (int mine = 1 ; mine < totalMine ; mine++){
+            int []nextArr = new int[totalPeople];
+            //初始化接下来的矿
+            for (int i = 1 ; i <= totalPeople ; i++){
+                //如果人手不够挖当前矿的话
+                int buwa = 0;
+                int wa = 0;
+                buwa = boundaryArr[i-1];
+                if(i >= needPeopleArr[mine]){
+                    int remain = i-needPeopleArr[mine];
+                    if(remain <= 0){
+                        wa = mineGoldArr[mine];
+                    }else{
+                        wa = mineGoldArr[mine] + boundaryArr[remain-1];
+                    }
+                }
+                //选择大的那个
+                if(buwa > wa){
+                    nextArr[i-1] = buwa;
+                }else{
+                    nextArr[i-1] = wa;
+                }
+            }
+            //nextArr作为新的边界数组
+            boundaryArr = nextArr;
+            System.out.println("mine:"+mine+"   arr:" + Arrays.toString(nextArr));
+        }
+
+        return boundaryArr[9];
+    }
+
+    public static void main(String[] args) {
+        System.out.println(jumpStage(5));
+        //System.out.println(countMax(4,10));
+    }
+}
